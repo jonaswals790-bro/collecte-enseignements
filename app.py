@@ -112,7 +112,7 @@ with tab_form:
                 "Age": age,
                 "Diplome": diplome if diplome != "Autre" else diplome_autre,
                 "Specialite": specialite,
-                "Anciennete": list({k: v for k, v in {"Moins de 5 ans": "Moins de 5 ans", "6 à 10 ans": "6 à 10 ans", "11 à 15 ans": "11 à 15 ans", "Plus de 15 ans": "Plus de 15 ans"}.items()})[[ "Moins de 5 ans", "6 à 10 ans", "11 à 15 ans", "Plus de 15 ans" ].index(anciennete)],
+                "Anciennete": anciennete,
                 "Etablissement": nom_etab,
                 "Statut_Etablissement": statut_etab,
                 "Frequence_Exercices": frequence,
@@ -157,9 +157,20 @@ with tab_form:
 with tab_dash:
     st.header("📈 Tableaux de Répartition et Analyse par Critères")
     
+    df_global = pd.DataFrame()
     if os.path.isfile(DATA_FILE):
-        df_global = pd.read_csv(DATA_FILE)
-        
+        try:
+            df_global = pd.read_csv(DATA_FILE)
+            # Vérification de sécurité de la structure
+            if "Statut_Etablissement" not in df_global.columns:
+                raise ValueError("Ancien format CSV détecté")
+        except Exception:
+            # En cas de fichier corrompu ou d'un mauvais format historique, nettoyage automatique
+            if os.path.isfile(DATA_FILE):
+                os.remove(DATA_FILE)
+            df_global = pd.DataFrame()
+
+    if not df_global.empty:
         # Filtre interactif de statut pour segmenter l'analyse
         statut_selection = st.selectbox(
             "🗂️ Sélectionner le Statut d'Établissement à analyser :",
@@ -169,7 +180,7 @@ with tab_dash:
         df = df_global if statut_selection == "Tous" else df_global[df_global["Statut_Etablissement"] == statut_selection]
         total_reponses = len(df)
         
-        st.write(f"Données basées sur un effectif total de **{total_reponses}** enseignant(s).")
+        st.write(f"Données basées sur un effectif de **{total_reponses}** enseignant(s) pour ce filtre.")
         
         if total_reponses > 0:
             
@@ -180,8 +191,11 @@ with tab_dash:
                 
                 # S'assurer que toutes les modalités prévues existent, même à 0
                 for opt in options_ordonnees:
-                    if opt not in counts: counts[opt] = 0
-                counts = counts.loc[options_ordonnees]
+                    if opt not in counts: 
+                        counts[opt] = 0
+                
+                # Filtrer l'affichage uniquement sur les options ordonnées principales passées
+                counts = counts.reindex(options_ordonnees, fill_value=0)
                 
                 df_tab = pd.DataFrame({
                     "Effectifs": counts.values,
@@ -202,7 +216,7 @@ with tab_dash:
                 if df_tab["Effectifs"].max() > 0:
                     majoritaire = df_tab["Pourcentage"].idxmax()
                     val_max = df_tab["Pourcentage"].max()
-                    st.markdown(f"**Analyse :** Les données récoltées indiquent une prédominance de la modalité **{majoritaire}** représentant **{val_max:.1f}%** de l'effectif interrogé. Cela montre les spécificités structurelles liées au critère évalué dans cette zone.")
+                    st.markdown(f"**Analyse :** Les données récoltées indiquent une prédominance de la modalité **{majoritaire}** représentant **{val_max:.1f}%** de l'effectif interrogé. Cela montre les spécificités structurelles liées au critère évalué.")
                 else:
                     st.markdown("**Analyse :** Données insuffisantes pour dégager une tendance significative.")
                 st.markdown("---")
@@ -237,26 +251,18 @@ with tab_dash:
                 st.markdown("---")
 
             # --- GÉNÉRATION DES 14 TABLEAUX RÉGLEMENTAIRES ---
-            
             generer_tableau_simple("Tableau 1 : Répartition des enseignants selon le sexe", "Sexe", ["Masculin", "Féminin"])
-            
             generer_tableau_simple("Tableau 2 : Répartition des enseignants selon leur âge", "Age", ["Moins de 30 ans", "30 – 40 ans", "41 – 50 ans", "Plus de 50 ans"])
-            
             generer_tableau_simple("Tableau 3 : Répartition des enseignants selon leur diplôme", "Diplome", ["DIPES I", "DIPES II", "Licence", "Master"])
-            
             generer_tableau_simple("Tableau 4 : Répartition des enseignants selon leur spécialité", "Specialite", ["Histoire", "Géographie"])
-            
             generer_tableau_simple("Tableau 5 : Répartition des enseignants selon leur ancienneté", "Anciennete", ["Moins de 5 ans", "6 à 10 ans", "11 à 15 ans", "Plus de 15 ans"])
-            
             generer_tableau_simple("Tableau 6 : Répartition des enseignants qui intègrent les exercices pratiques", "Frequence_Exercices", ["À chaque leçon", "Souvent", "Parfois", "Rarement", "Jamais"])
             
             generer_tableau_choix_multiples("Tableau 7 : Répartition selon le type d'exercices organisés le plus souvent", 
                                             ["Analyse de documents historiques ou géographiques", "Lecture et interprétation des cartes", "Travaux de groupe", "Sorties pédagogiques", "Jeux de rôle"])
             
             generer_tableau_simple("Tableau 8 : Répartition selon les matériels didactiques disponibles", "Materiel_Suffisant", ["Oui", "Non"])
-            
             generer_tableau_simple("Tableau 9 : Répartition des enseignants ayant reçu une formation spécifique", "Formation_Specifique", ["Oui", "Non"])
-            
             generer_tableau_simple("Tableau 10 : Répartition du temps accordé aux exercices pratiques", "Temps_Accorde", ["Moins de 15 min", "15 – 30 min", "30 – 60 min", "Plus d’une heure"])
             
             generer_tableau_choix_multiples("Tableau 11 : Répartition selon les obstacles rencontrés", 
@@ -275,9 +281,10 @@ with tab_dash:
             st.header("🏁 Synthèse Comparative Finale entre Statuts")
             st.write("Ce tableau croisé récapitule et confronte les deux indicateurs structurels les plus critiques de l'enquête pour l'ensemble des secteurs.")
             
-            # Création d'une table croisée Statut vs Disponibilité Matériel
-            ct_synthese = pd.crosstab(df_global["Statut_Etablissement"], df_global["Materiel_Suffisant"], normalize='index') * 100
-            st.dataframe(ct_synthese.style.format("{:.1f} %"))
+            # Création sécurisée de la table croisée
+            if "Statut_Etablissement" in df_global.columns and "Materiel_Suffisant" in df_global.columns:
+                ct_synthese = pd.crosstab(df_global["Statut_Etablissement"], df_global["Materiel_Suffisant"], normalize='index') * 100
+                st.dataframe(ct_synthese.style.format("{:.1f} %"))
             
             st.markdown("### 📝 Conclusion d'interprétation générale :")
             st.info(
