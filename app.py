@@ -161,7 +161,28 @@ with tab_dash:
     df_global = pd.DataFrame()
     if os.path.isfile(DATA_FILE):
         try:
-            df_global = pd.read_csv(DATA_FILE)
+           # --- DEBUT DU BLOC DE LECTURE SÉCURISÉ ---
+import os
+
+# Liste de toutes les colonnes pour initialiser le fichier si nécessaire
+COLUMNS_BLOC = [
+    "Sexe", "Age", "Diplome", "Specialite", "Anciennete", "Etablissement", "Statut",
+    "Frequence_TP", "Types_TP", "Materiel_Didactique", "Formation_Specifique", 
+    "Precision_Formation", "Temps_TP", "Obstacles_TP", "Exemple_Echec", 
+    "Conditions_Favorables", "Justification_Conditions", "Evaluation_TP", 
+    "Amélioration_Apprentissage", "Explication_Apprentissage", "Solutions_Proposees"
+]
+
+# Vérification : si le fichier existe et n'est pas vide
+if os.path.exists(DATA_FILE) and os.path.getsize(DATA_FILE) > 0:
+    try:
+        df_global = pd.read_csv(DATA_FILE)
+    except Exception:
+        df_global = pd.DataFrame(columns=COLUMNS_BLOC)
+else:
+    # Si le fichier n'existe pas encore sur le serveur Streamlit Cloud
+    df_global = pd.DataFrame(columns=COLUMNS_BLOC)
+# --- FIN DU BLOC DE LECTURE SÉCURISÉ ---
             if "Statut_Etablissement" not in df_global.columns:
                 raise ValueError("Ancien format CSV détecté")
         except Exception:
