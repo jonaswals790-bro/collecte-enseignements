@@ -106,12 +106,11 @@ with tab_form:
         if not nom_etab:
             st.error("⚠️ Veuillez renseigner le nom de votre établissement avant de valider.")
         else:
-            val_diplome = diplome if diplome != "Autre" else (diplome_autre if diplome_autre else "Autre")
             nouvelle_reponse = {
                 "Horodatage": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "Sexe": sexe,
                 "Age": age,
-                "Diplome": val_diplome,
+                "Diplome": diplome if diplome != "Autre" else diplome_autre,
                 "Specialite": specialite,
                 "Anciennete": anciennete,
                 "Etablissement": nom_etab,
@@ -158,39 +157,13 @@ with tab_form:
 with tab_dash:
     st.header("📈 Tableaux de Répartition et Analyse par Critères")
     
-    df_global = pd.DataFrame()
-    if os.path.isfile(DATA_FILE):
-        try:
-           # --- DEBUT DU BLOC DE LECTURE SÉCURISÉ ---
-import os
-
-# Liste de toutes les colonnes pour initialiser le fichier si nécessaire
-COLUMNS_BLOC = [
-    "Sexe", "Age", "Diplome", "Specialite", "Anciennete", "Etablissement", "Statut",
-    "Frequence_TP", "Types_TP", "Materiel_Didactique", "Formation_Specifique", 
-    "Precision_Formation", "Temps_TP", "Obstacles_TP", "Exemple_Echec", 
-    "Conditions_Favorables", "Justification_Conditions", "Evaluation_TP", 
-    "Amélioration_Apprentissage", "Explication_Apprentissage", "Solutions_Proposees"
-]
-
-# Vérification : si le fichier existe et n'est pas vide
-if os.path.exists(DATA_FILE) and os.path.getsize(DATA_FILE) > 0:
-    try:
-        df_global = pd.read_csv(DATA_FILE)
-    except Exception:
-        df_global = pd.DataFrame(columns=COLUMNS_BLOC)
-else:
-    # Si le fichier n'existe pas encore sur le serveur Streamlit Cloud
-    df_global = pd.DataFrame(columns=COLUMNS_BLOC)
-# --- FIN DU BLOC DE LECTURE SÉCURISÉ ---
-            if "Statut_Etablissement" not in df_global.columns:
-                raise ValueError("Ancien format CSV détecté")
-        except Exception:
-            if os.path.isfile(DATA_FILE):
-                os.remove(DATA_FILE)
-            df_global = pd.DataFrame()
+    # --- INSERTION SÉCURISÉE DE L'INITIALISATION DU CSV (SANS ERREUR D'INDENTATION) ---
+    COLUMNS_BLOC = ["Sexe", "Age", "Diplome", "Specialite", "Anciennete", "Etablissement", "Statut_Etablissement", "Frequence_Exercices", "Analyse de documents historiques ou géographiques", "Lecture et interprétation des cartes", "Travaux de groupe", "Sorties pédagogiques", "Jeux de rôle", "Materiel_Suffisant", "Manques_Materiel", "Formation_Specifique", "Formation_Details", "Temps_Accorde", "Effectif pléthorique", "Insuffisance de matériel", "Manque de temps dans l’emploi du temps", "Manque de formation pratique", "Motivation faible des élèves", "Exemple_Echec", "Conditions_Etab_Favorables", "Justification_Conditions", "Notes individuelles", "Travaux de groupes", "Observation en classe", "Participation orale", "Amelioration_Citoyennete", "Explication_Amelioration", "Propositions_Solutions"]
+    df_global = pd.read_csv(DATA_FILE) if (os.path.exists(DATA_FILE) and os.path.getsize(DATA_FILE) > 0) else pd.DataFrame(columns=COLUMNS_BLOC)
+    # ----------------------------------------------------------------------------------
 
     if not df_global.empty:
+        # Filtre interactif de statut pour segmenter l'analyse
         statut_selection = st.selectbox(
             "🗂️ Sélectionner le Statut d'Établissement à analyser :",
             ["Tous", "Public", "Privé", "Confessionnel"]
@@ -203,23 +176,25 @@ else:
         
         if total_reponses > 0:
             
+            # Fonction d'affichage standardisée pour les critères à choix unique
             def generer_tableau_simple(titre, colonne, options_ordonnees):
                 st.subheader(titre)
                 counts = df[colonne].value_counts()
                 
-                # S'assurer que les valeurs observées hors-options (comme les diplômes libres) ne fassent pas crasher le script
-                toutes_options = list(options_ordonnees)
-                for val in counts.index:
-                    if val not in toutes_options:
-                        toutes_options.append(val)
+                # S'assurer que toutes les modalités prévues existent, même à 0
+                for opt in options_ordonnees:
+                    if opt not in counts: 
+                        counts[opt] = 0
                 
-                counts = counts.reindex(toutes_options, fill_value=0)
+                # Filtrer l'affichage uniquement sur les options ordonnées principales passées
+                counts = counts.reindex(options_ordonnees, fill_value=0)
                 
                 df_tab = pd.DataFrame({
                     "Effectifs": counts.values,
                     "Pourcentage": [(v / total_reponses * 100) for v in counts.values]
                 }, index=counts.index)
                 
+                # Ajouter la ligne Total
                 df_total = pd.DataFrame({"Effectifs": [total_reponses], "Pourcentage": [100.0]}, index=["Total"])
                 df_complet = pd.concat([df_tab, df_total])
                 
@@ -229,6 +204,7 @@ else:
                 with c2:
                     st.bar_chart(df_tab["Pourcentage"], horizontal=True)
                 
+                # Moteur d'analyse de texte automatique
                 if df_tab["Effectifs"].max() > 0:
                     majoritaire = df_tab["Pourcentage"].idxmax()
                     val_max = df_tab["Pourcentage"].max()
@@ -237,6 +213,7 @@ else:
                     st.markdown("**Analyse :** Données insuffisantes pour dégager une tendance significative.")
                 st.markdown("---")
 
+            # Fonction d'affichage pour les variables à choix multiples
             def generer_tableau_choix_multiples(titre, list_colonnes):
                 st.subheader(titre)
                 effectifs = []
@@ -290,10 +267,13 @@ else:
             
             generer_tableau_simple("Tableau 14 : Répartition selon l’amélioration des apprentissages grâce aux exercices", "Amelioration_Citoyennete", ["Oui, beaucoup", "Oui, un peu", "Non, vraiment pas", "Pas du tout"])
 
-            # --- SECTION SYNTHÈSE GLOBALE CROISÉE ---
+            # =============================================================================
+            # SECTION : COMPARAISON FINALE ET SYNTHÈSE GLOBALE CROISÉE
+            # =============================================================================
             st.header("🏁 Synthèse Comparative Finale entre Statuts")
             st.write("Ce tableau croisé récapitule et confronte les deux indicateurs structurels les plus critiques de l'enquête pour l'ensemble des secteurs.")
             
+            # Création sécurisée de la table croisée
             if "Statut_Etablissement" in df_global.columns and "Materiel_Suffisant" in df_global.columns:
                 ct_synthese = pd.crosstab(df_global["Statut_Etablissement"], df_global["Materiel_Suffisant"], normalize='index') * 100
                 st.dataframe(ct_synthese.style.format("{:.1f} %"))
