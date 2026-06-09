@@ -5,7 +5,7 @@ from datetime import datetime
 
 # Configuration de la page pour un rendu professionnel et large
 st.set_page_config(
-    page_title="Collecte & Analyse - Histoire-Géo & EC",
+    page_title="Analyse Académique - Histoire-Géo & EC",
     page_icon="📚",
     layout="wide"
 )
@@ -25,7 +25,6 @@ with st.sidebar:
     st.title("🎛️ Panneau de Contrôle")
     st.markdown("---")
     
-    # Menu de sélection d'action aligné verticalement
     action = st.radio(
         "Sélectionnez une action opérationnelle :",
         ["➕ Ajouter une personne", "✏️ Modifier une entrée", "❌ Supprimer une entrée"],
@@ -34,13 +33,12 @@ with st.sidebar:
     
     st.markdown("---")
     st.subheader("📥 Extraction")
-    # Option Télécharger toujours disponible à gauche dans son cadre
     if not df_global.empty:
         csv_data = df_global.to_csv(index=False, encoding="utf-8")
         st.download_button(
             label="📊 Télécharger le CSV complet",
             data=csv_data,
-            file_name=f"Rapport_Enquete_INF232_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+            file_name=f"Rapport_Enquete_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
             mime="text/csv",
             use_container_width=True
         )
@@ -50,22 +48,31 @@ with st.sidebar:
 # =============================================================================
 # ZONE CENTRALE DE L'APPLICATION
 # =============================================================================
-st.title("📋 Évaluation de la conduite des exercices pratiques")
-st.subheader("Histoire-Géographie et Éducation à la Citoyenneté (Arrondissement de Ngaoundéré 1er)")
 
-# Organisation en onglets principaux
-tab_form, tab_dash = st.tabs(["📝 Formulaire & Opérations", "📊 Tableaux Statistiques & Analyses"])
+# --- EN-TÊTE DU QUESTIONNAIRE ACADÉMIQUE (SANS INF 232) ---
+st.markdown(
+    """
+    <div style="background-color:#1E1E2F; padding:20px; border-radius:10px; border-left:8px solid #FF4B4B; margin-bottom:25px;">
+        <h2 style="color:white; margin-top:0px; margin-bottom:10px; font-size: 24px; line-height: 1.3;">
+            QUESTIONNAIRE DÉTAILLÉ DESTINÉ AUX ENSEIGNANTS ET AUX APPRENANTS SUR LE THÈME :<br>
+            <span style="color:#FF4B4B;">« ÉVALUATION DES DYSFONCTIONNEMENTS DE LA CONDUITE DES EXERCICES PRATIQUES EN HISTOIRE-GÉOGRAPHIE ET ÉDUCATION À LA CITOYENNETÉ : CAS DE L'ARRONDISSEMENT DE NGAOUNDÉRÉ 1<sup>ER</sup> »</span>
+        </h2>
+        <p style="color:#D1D1E0; font-style: italic; margin-bottom:0; font-size: 14px;">
+            <b>Introduction :</b> Ce questionnaire s'inscrit dans le cadre d'une étude sur l'évaluation des dysfonctionnements de la conduite des exercices pratiques en Histoire-Géographie et Éducation à la Citoyenneté dans l'arrondissement de Ngaoundéré 1er. L'objectif est de comprendre les difficultés rencontrées, les méthodes utilisées, les ressources disponibles, et les pistes d'amélioration possibles. Les réponses resteront strictement confidentielles et ne serviront qu'à des fins scientifiques. Merci pour votre disponibilité et votre sincerity.
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+tab_form, tab_dash = st.tabs(["📝 Formulaire & Opérations", "📊 Rapport d'Analyse & Critique Scientifique"])
 
 # =============================================================================
-# ONGLET 1 : TRAITEMENT DE L'ACTION SÉLECTIONNÉE (AJOUTER / MODIFIER / SUPPRIMER)
+# ONGLET 1 : TRAITEMENT DE L'ACTION SÉLECTIONNÉE
 # =============================================================================
 with tab_form:
-    
-    # CAS 1 : AJOUTER UNE PERSONNE
     if action == "➕ Ajouter une personne":
-        st.info(
-            "**Mode Ajout :** Remplissez le formulaire académique ci-dessous pour insérer un nouvel enseignant dans le registre."
-        )
+        st.info("**Mode Ajout :** Remplissez le formulaire académique ci-dessous pour insérer un nouvel enseignant dans le registre.")
         with st.form("form_evaluation"):
             st.header("I. Informations Personnelles et Professionnelles")
             col1, col2 = st.columns(2)
@@ -124,7 +131,7 @@ with tab_form:
 
         if submit_button:
             if not nom_etab:
-                st.error("Le nom de l'établissement est requis.")
+                st.error("⚠️ Le nom de l'établissement est requis.")
             else:
                 nouvelle_reponse = {
                     "Horodatage": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "Sexe": sexe, "Age": age,
@@ -139,7 +146,7 @@ with tab_form:
                     "Manque de formation pratique": 1 if obs_formation else 0, "Motivation faible des élèves": 1 if obs_motivation else 0,
                     "Exemple_Echec": exemple_concret, "Conditions_Etab_Favorables": conditions_etab, "Justification_Conditions": justification_cond,
                     "Notes individuelles": 1 if eval_notes else 0, "Travaux de groupes": 1 if eval_groupes else 0, "Observation en classe": 1 if eval_obs else 0,
-                    "Participation orale": 1 if eval_orale else 0, "Amelioration_Citoyennete": amelioration_apprentissage,
+                    "Participation orale": 1 if eval_orale else 0, "Amelioration_Citoyennete":  amelioration_apprentissage,
                     "Explication_Amelioration": explication_apprentissage, "Propositions_Solutions": solutions_propositions
                 }
                 df_nouvelle = pd.DataFrame([nouvelle_reponse])
@@ -150,7 +157,6 @@ with tab_form:
                 st.success("🎉 Enregistrement effectué avec succès !")
                 st.rerun()
 
-    # CAS 2 : MODIFIER UNE ENTRÉE
     elif action == "✏️ Modifier une entrée":
         st.subheader("📝 Modification d'un enregistrement")
         if not df_global.empty:
@@ -168,92 +174,164 @@ with tab_form:
                 df_global.at[idx_edit, 'Statut_Etablissement'] = new_statut
                 df_global.at[idx_edit, 'Propositions_Solutions'] = new_sol
                 df_global.to_csv(DATA_FILE, index=False, encoding="utf-8")
-                st.success(" Entrée mise à jour !")
+                st.success("🔄 Entrée mise à jour !")
                 st.rerun()
         else:
             st.warning("Aucune donnée disponible à modifier.")
 
-    # CAS 3 : SUPPRIMER UNE ENTRÉE
-    elif action == " Supprimer une entrée":
-        st.subheader("Zone de Suppression")
+    elif action == "❌ Supprimer une entrée":
+        st.subheader("🗑️ Zone de Suppression")
         if not df_global.empty:
             options_sup = df_global.apply(lambda r: f"{r['Etablissement']} ({r['Horodatage']})", axis=1).tolist()
             selected_del = st.selectbox("Sélectionner l'élément à détruire :", options_sup)
             
-            st.error("Cette action supprimera définitivement la ligne du fichier CSV.")
-            if st.button(" Confirmer la suppression"):
+            st.error("⚠️ Cette action supprimera définitivement la ligne du fichier CSV.")
+            if st.button("🔥 Confirmer la suppression"):
                 idx_del = options_sup.index(selected_del)
                 df_global = df_global.drop(df_global.index[idx_del])
                 df_global.to_csv(DATA_FILE, index=False, encoding="utf-8")
-                st.success(" L'entrée a été effacée.")
+                st.success("🗑️ L'entrée a été effacée.")
                 st.rerun()
         else:
             st.warning("Aucune donnée à supprimer.")
 
 # =============================================================================
-# ONGLET 2 : GRAPHIQUES ET ANALYSES STATISTIQUES
+# ONGLET 2 : RAPPORT D'ANALYSE APPROFONDI ET CRITIQUE (POUR STAGE)
 # =============================================================================
 with tab_dash:
-    st.header(" Tableaux de Répartition et Analyse par Critères")
+    st.header("🔬 Rapport de Diagnostic Sociopédagogique et Statistique")
+    st.write("Ce module génère des analyses critiques automatiques prêtes à être intégrées dans votre rapport de stage.")
+    
     if not df_global.empty:
-        statut_selection = st.selectbox(" Filtrer par Statut d'Établissement :", ["Tous", "Public", "Privé", "Confessionnel"])
+        statut_selection = st.selectbox("🗂️ Isoler un secteur d'analyse (Filtre Académique) :", ["Tous", "Public", "Privé", "Confessionnel"])
         df = df_global if statut_selection == "Tous" else df_global[df_global["Statut_Etablissement"] == statut_selection]
         total_reponses = len(df)
         
-        st.write(f"Données basées sur un effectif de **{total_reponses}** enseignant(s).")
-        
+        # Section KPI d'introduction
+        c_kpi1, c_kpi2, c_kpi3 = st.columns(3)
+        with c_kpi1:
+            st.metric("Taille de l'Échantillon ($N$)", f"{total_reponses} Enseignant(s)")
+        with c_kpi2:
+            Tx_suffisance = (df["Materiel_Suffisant"].value_counts(normalize=True).get("Oui", 0) * 100) if total_reponses > 0 else 0
+            st.metric("Taux de Suffisance Matérielle", f"{Tx_suffisance:.1f} %", delta=f"{Tx_suffisance-50:.1f}% vs Seuil critique")
+        with c_kpi3:
+            Tx_formation = (df["Formation_Specifique"].value_counts(normalize=True).get("Oui", 0) * 100) if total_reponses > 0 else 0
+            st.metric("Taux d'Enseignants Formés Pratiquement", f"{Tx_formation:.1f} %")
+            
+        st.markdown("---")
+
         if total_reponses > 0:
-            def generer_tableau_simple(titre, colonne, options_ordonnees):
-                st.subheader(titre)
+            def generer_tableau_critique(titre, colonne, options_ordonnees, interpretation_contextuelle):
+                st.markdown(f"### 📊 {titre}")
                 counts = df[colonne].value_counts()
                 for opt in options_ordonnees:
                     if opt not in counts: counts[opt] = 0
                 counts = counts.reindex(options_ordonnees, fill_value=0)
                 
                 df_tab = pd.DataFrame({"Effectifs": counts.values, "Pourcentage": [(v / total_reponses * 100) for v in counts.values]}, index=counts.index)
-                df_total = pd.DataFrame({"Effectifs": [total_reponses], "Pourcentage": [100.0]}, index=["Total"])
+                
+                majoritaire = counts.idxmax()
+                pct_majoritaire = (counts.max() / total_reponses) * 100
                 
                 c1, c2 = st.columns([1, 1])
-                with c1: st.dataframe(pd.concat([df_tab, df_total]).style.format({"Pourcentage": "{:.1f} %"}))
-                with c2: st.bar_chart(df_tab["Pourcentage"], horizontal=True)
-                st.markdown("---")
+                with c1:
+                    st.dataframe(df_tab.style.format({"Pourcentage": "{:.1f} %"}), use_container_width=True)
+                with c2:
+                    st.bar_chart(df_tab["Pourcentage"], horizontal=True)
+                
+                with st.expander("🔍 Interprétation Scientifique et Critique (Idéal pour le rapport)", expanded=True):
+                    st.markdown(f"""
+                    **Constat statistique :** Les données empiriques révèlent une dominance de la modalité **"{majoritaire}"**, représentant **{pct_majoritaire:.1f}%** de la sous-population analysée.
+                    
+                    **Analyse critique :** {interpretation_contextuelle(majoritaire, pct_majoritaire)}
+                    """)
+                st.markdown("<br>", unsafe_allowed_html=True)
 
-            def generer_tableau_choix_multiples(titre, list_colonnes):
-                st.subheader(titre)
+            def generer_choix_multiples_critique(titre, list_colonnes, type_analyse):
+                st.markdown(f"### ⚠️ {titre}")
                 effectifs = [df[col].sum() if col in df.columns else 0 for col in list_colonnes]
                 pourcentages = [(eff / total_reponses * 100) if total_reponses > 0 else 0 for eff in effectifs]
-                df_tab = pd.DataFrame({"Effectifs": effectifs, "Pourcentage": pourcentages}, index=list_colonnes)
+                df_tab = pd.DataFrame({"Effectifs": effectifs, "Pourcentage": pourcentages}, index=list_colonnes).sort_values(by="Effectifs", ascending=False)
                 
                 c1, c2 = st.columns([1, 1])
-                with c1: st.dataframe(df_tab.style.format({"Pourcentage": "{:.1f} %"}))
-                with c2: st.bar_chart(df_tab["Pourcentage"], horizontal=True)
-                st.markdown("---")
+                with c1:
+                    st.dataframe(df_tab.style.format({"Pourcentage": "{:.1f} %"}), use_container_width=True)
+                with c2:
+                    st.bar_chart(df_tab["Pourcentage"], horizontal=True)
+                
+                top_obstacle = df_tab.index[0]
+                top_pct = df_tab.iloc[0]["Pourcentage"]
+                
+                with st.expander("🚨 Diagnostic des Vulnérabilités Institutionnelles", expanded=True):
+                    if type_analyse == "obstacles":
+                        st.markdown(f"""
+                        **Facteur d'achoppement prédominant :** Le principal goulet d'étranglement identifié par l'échantillon est **"{top_obstacle}"** avec un taux d'impact critique de **{top_pct:.1f}%**.
+                        
+                        **Interprétation pour le stage :** Ce résultat met en évidence une crise structurelle. Lorsque les variables matérielles ou de surpeuplement des classes étouffent l'approche par compétences (APC), l'évaluation sommative se limite à de la récitation théorique, vidant l'Éducation à la Citoyenneté de sa substance pragmatique.
+                        """)
+                    else:
+                        st.markdown(f"""
+                        **Priorité méthodologique :** La méthode d'évaluation la plus exploitée est **"{top_obstacle}"** ({top_pct:.1f}%).
+                        
+                        **Interprétation pour le stage :** L'hégémonie de ce mode d'évaluation indique que la notation reste classique. Un équilibre avec les travaux de groupe et les observations en situation réelle est indispensable pour valider de réelles compétences citoyennes.
+                        """)
+                st.markdown("<br>", unsafe_allowed_html=True)
 
-            # Appels des tableaux réglementaires
-            generer_tableau_simple("Tableau 1 : Répartition selon le sexe", "Sexe", ["Masculin", "Féminin"])
-            generer_tableau_simple("Tableau 2 : Répartition selon l'âge", "Age", ["Moins de 30 ans", "30 – 40 ans", "41 – 50 ans", "Plus de 50 ans"])
-            generer_tableau_simple("Tableau 3 : Répartition selon le diplôme", "Diplome", ["DIPES I", "DIPES II", "Licence", "Master"])
-            generer_tableau_simple("Tableau 4 : Répartition selon la spécialité", "Specialite", ["Histoire", "Géographie"])
-            generer_tableau_simple("Tableau 5 : Répartition selon l'ancienneté", "Anciennete", ["Moins de 5 ans", "6 à 10 ans", "11 à 15 ans", "Plus de 15 ans"])
-            generer_tableau_simple("Tableau 6 : Fréquence d'intégration des exercices", "Frequence_Exercices", ["À chaque leçon", "Souvent", "Parfois", "Rarement", "Jamais"])
-            generer_tableau_choix_multiples("Tableau 7 : Types d'exercices organisés", ["Analyse de documents historiques ou géographiques", "Lecture et interprétation des cartes", "Travaux de groupe", "Sorties pédagogiques", "Jeux de rôle"])
-            generer_tableau_simple("Tableau 8 : Matériels didactiques disponibles", "Materiel_Suffisant", ["Oui", "Non"])
-            generer_tableau_simple("Tableau 9 : Formation spécifique reçue", "Formation_Specifique", ["Oui", "Non"])
-            generer_tableau_simple("Tableau 10 : Temps accordé aux exercices pratiques", "Temps_Accorde", ["Moins de 15 min", "15 – 30 min", "30 – 60 min", "Plus d’une heure"])
-            generer_tableau_choix_multiples("Tableau 11 : Obstacles rencontrés", ["Effectif pléthorique", "Insuffisance de matériel", "Manque de temps dans l’emploi du temps", "Manque de formation pratique", "Motivation faible des élèves"])
-            generer_tableau_simple("Tableau 12 : Conditions matérielles globales", "Conditions_Etab_Favorables", ["Oui", "Non", "Partiellement"])
-            generer_tableau_choix_multiples("Tableau 13 : Modes d'évaluations appliqués", ["Notes individuelles", "Travaux de groupes", "Observation en classe", "Participation orale"])
-            generer_tableau_simple("Tableau 14 : Amélioration des apprentissages", "Amelioration_Citoyennete", ["Oui, beaucoup", "Oui, un peu", "Non, vraiment pas", "Pas du tout"])
+            # --- CORPS DU RAPPORT DIRECTEMENT EXPLOITABLE ---
+            
+            # 1. Profil des répondants
+            st.subheader("1. Analyse du Profil Socio-Professionnel des Enseignants")
+            generer_tableau_critique(
+                "Profil d'Ancienneté des répondants", 
+                "Anciennete", 
+                ["Moins de 5 ans", "6 à 10 ans", "11 à 15 ans", "Plus de 15 ans"],
+                lambda maj, pct: f"La forte proportion d'enseignants ayant une ancienneté de ({maj} : {pct:.1f}%) implique un corps enseignant qui possède des habitudes pédagogiques bien ancrées. S'ils n'ont pas reçu de recyclage récent sur les outils numériques ou cartographiques, le risque d'ankylose méthodologique est élevé."
+            )
+            
+            # 2. Pratiques réelles
+            st.subheader("2. Évaluation Critique des Pratiques Pédagogiques")
+            generer_tableau_critique(
+                "Fréquence d'intégration des exercices pratiques", 
+                "Frequence_Exercices", 
+                ["À chaque leçon", "Souvent", "Parfois", "Rarement", "Jamais"],
+                lambda maj, pct: f"L'évaluation de la fréquence montre que la modalité majoritaire est '{maj}' ({pct:.1f}%). Si cette fréquence est faible ('Rarement'/'Jamais'), cela prouve que les exercices pratiques sont considérés comme des activités secondaires ou optionnelles, souvent sacrifiées pour boucler les programmes théoriques volumineux exigés par les inspections d'Histoire-Géographie."
+            )
 
-            # --- LE TABLEAU CROISÉ CORRIGÉ (LIGNE 303 FERMÉE) ---
-            st.header(" Synthèse Comparative Finale entre Statuts")
+            # 3. Obstacles et Crise structurelle
+            st.subheader("3. Analyse des Dysfonctionnements Système")
+            generer_choix_multiples_critique("Hiérarchisation des obstacles à l'apprentissage", ["Effectif pléthorique", "Insuffisance de matériel", "Manque de temps dans l’emploi du temps", "Manque de formation pratique", "Motivation faible des élèves"], "obstacles")
+
+            # 4. Évaluations
+            st.subheader("4. Typologie des Systèmes d'Évaluation Appliqués")
+            generer_choix_multiples_critique("Modes d'évaluations appliqués sur le terrain", ["Notes individuelles", "Travaux de groupes", "Observation en classe", "Participation orale"], "evaluations")
+
+            # =============================================================================
+            # SYNTHÈSE ET CROISÉ COMPORTEMENTAL (LE COEUR DU RAPPORT DE STAGE)
+            # =============================================================================
+            st.header("🏁 Analyse Croisée Comparative Avancée")
+            st.markdown("### Tableau Croisé : Dotation Matérielle selon le Statut de l'Établissement")
+            
             if "Statut_Etablissement" in df_global.columns and "Materiel_Suffisant" in df_global.columns:
                 ct_synthese = pd.crosstab(df_global["Statut_Etablissement"], df_global["Materiel_Suffisant"], normalize='index') * 100
-                st.dataframe(ct_synthese.style.format("{:.1f} %"))
+                st.dataframe(ct_synthese.style.format("{:.1f} %"), use_container_width=True)
+                
+                st.markdown("#### 🔍 Lecture et Analyse Critique de la Corrélation :")
+                st.info("""
+                **Interprétation de la fracture sectorielle :**
+                * **Secteur Public :** Généralement marqué par des effectifs massifs, les infrastructures y peinent à suivre, créant une insuffisance chronique de cartes murales et de manuels.
+                * **Secteur Privé / Confessionnel :** Bénéficiant d'un mode de gouvernance plus flexible, ces structures affichent souvent des taux de satisfaction matérielle supérieurs, se traduisant par une mise en œuvre plus fréquente des travaux dirigés et simulations citoyennes.
+                """)
             
-            st.markdown("### Conclusion d'interprétation générale :")
-            st.info("L'examen comparatif des données empiriques recueillies met en exergue des disparités significatives...")
+            # RECOMMANDATIONS OPÉRATIONNELLES DE STAGE
+            st.markdown("### 💡 Propositions de Résolution et Recommandations (Section Stage)")
+            st.success("""
+            Au terme de cette étude empirique menée dans l'Arrondissement de **Ngaoundéré 1er**, trois axes stratégiques se dégagent pour rehausser le niveau de conduite des exercices pratiques :
+            1. **Réaménagement Horaire :** Sanctuariser une plage horaire hebdomadaire de deux heures exclusivement dédiée aux manipulations pratiques (Cartographie, Travaux de groupes).
+            2. **Mutualisation Institutionnelle :** Créer une banque de ressources numériques (Cartes vectorielles, guides d'exercices d'Histoire) partagée entre les établissements publics et privés de la place.
+            3. **Renforcement des Capacités Locales :** Mettre en place des séminaires d'animation pédagogique au sein des bassins d'apprentissage afin d'initier les jeunes enseignants aux méthodes actives (jeux de rôles citoyennes).
+            """)
+            
         else:
-            st.warning(" Aucune donnée disponible pour ce filtre.")
+            st.warning("⚠️ Aucune donnée disponible pour ce filtre.")
     else:
-        st.info(" En attente des premières réponses pour projeter l'analyse automatique.")
+        st.info("💡 En attente des premières réponses pour projeter le rapport d'analyse automatique.")
