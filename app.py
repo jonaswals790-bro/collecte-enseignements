@@ -275,7 +275,7 @@ with tab_dash:
                         
                         **Interprétation pour le stage :** L'hégémonie de ce mode d'évaluation indique que la notation reste classique. Un équilibre avec les travaux de groupe et les observations en situation réelle est indispensable pour valider de réelles compétences citoyennes.
                         """)
-                st.markdown("<br>", unsafe_allowed_html=True)
+                st.markdown("<br>", unsafe_allow_html=True)
 
             # --- CORPS DU RAPPORT DIRECTEMENT EXPLOITABLE ---
             
