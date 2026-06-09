@@ -187,7 +187,7 @@ with tab_form:
             
             st.error("⚠️ Cette action supprimera définitivement la ligne du fichier CSV.")
             if st.button("🔥 Confirmer la suppression"):
-                idx_del = options_sup.index(selected_del)
+Une fois sur ton applicatio                idx_del = options_sup.index(selected_del)
                 df_global = df_global.drop(df_global.index[idx_del])
                 df_global.to_csv(DATA_FILE, index=False, encoding="utf-8")
                 st.success("🗑️ L'entrée a été effacée.")
@@ -245,7 +245,7 @@ with tab_dash:
                     
                     **Analyse critique :** {interpretation_contextuelle(majoritaire, pct_majoritaire)}
                     """)
-                st.markdown("<br>", unsafe_allowed_html=True)
+                st.markdown("")
 
             def generer_choix_multiples_critique(titre, list_colonnes, type_analyse):
                 st.markdown(f"### ⚠️ {titre}")
