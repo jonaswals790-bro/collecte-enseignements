@@ -49,7 +49,7 @@ with st.sidebar:
 # ZONE CENTRALE DE L'APPLICATION
 # =============================================================================
 
-# --- EN-TÊTE DU QUESTIONNAIRE ACADÉMIQUE (SANS INF 232) ---
+# --- EN-TÊTE DU QUESTIONNAIRE ACADÉMIQUE ---
 st.markdown(
     """
     <div style="background-color:#1E1E2F; padding:20px; border-radius:10px; border-left:8px solid #FF4B4B; margin-bottom:25px;">
@@ -58,7 +58,7 @@ st.markdown(
             <span style="color:#FF4B4B;">« ÉVALUATION DES DYSFONCTIONNEMENTS DE LA CONDUITE DES EXERCICES PRATIQUES EN HISTOIRE-GÉOGRAPHIE ET ÉDUCATION À LA CITOYENNETÉ : CAS DE L'ARRONDISSEMENT DE NGAOUNDÉRÉ 1<sup>ER</sup> »</span>
         </h2>
         <p style="color:#D1D1E0; font-style: italic; margin-bottom:0; font-size: 14px;">
-            <b>Introduction :</b> Ce questionnaire s'inscrit dans le cadre d'une étude sur l'évaluation des dysfonctionnements de la conduite des exercices pratiques en Histoire-Géographie et Éducation à la Citoyenneté dans l'arrondissement de Ngaoundéré 1er. L'objectif est de comprendre les difficultés rencontrées, les méthodes utilisées, les ressources disponibles, et les pistes d'amélioration possibles. Les réponses resteront strictement confidentielles et ne serviront qu'à des fins scientifiques. Merci pour votre disponibilité et votre sincerity.
+            <b>Introduction :</b> Ce questionnaire s'inscrit dans le cadre d'une étude sur l'évaluation des dysfonctionnements de la conduite des exercices pratiques en Histoire-Géographie et Éducation à la Citoyenneté dans l'arrondissement de Ngaoundéré 1er. L'objectif est de comprendre les difficultés rencontrées, les méthodes utilisées, les ressources disponibles, et les pistes d'amélioration possibles. Les réponses resteront strictement confidentielles et ne serviront qu'à des fins scientifiques. Merci pour votre disponibilité et votre sincérité.
         </p>
     </div>
     """,
@@ -187,7 +187,7 @@ with tab_form:
             
             st.error("⚠️ Cette action supprimera définitivement la ligne du fichier CSV.")
             if st.button("🔥 Confirmer la suppression"):
-Une fois sur ton applicatio                idx_del = options_sup.index(selected_del)
+                idx_del = options_sup.index(selected_del)
                 df_global = df_global.drop(df_global.index[idx_del])
                 df_global.to_csv(DATA_FILE, index=False, encoding="utf-8")
                 st.success("🗑️ L'entrée a été effacée.")
@@ -241,11 +241,11 @@ with tab_dash:
                 
                 with st.expander("🔍 Interprétation Scientifique et Critique (Idéal pour le rapport)", expanded=True):
                     st.markdown(f"""
-                    **Constat statistique :** Les données empiriques révèlent une dominance de la modalité **"{majoritaire}"**, représentant **{pct_majoritaire:.1f}%** de la sous-population analysée.
+                    **Constat statistique :** Les données empiriques révèlent une dominance de la modalité **"{majoritaire}"**, représentant **{pct_majoritaire:.1f}%** de la sous-population analysée[cite: 13, 20].
                     
-                    **Analyse critique :** {interpretation_contextuelle(majoritaire, pct_majoritaire)}
+                    **Analyse critique :** {interpretation_contextuelle(majoritaire, pct_majoritaire)} [cite: 17, 18, 22]
                     """)
-                st.markdown("")
+                st.markdown("<br>", unsafe_allow_html=True)
 
             def generer_choix_multiples_critique(titre, list_colonnes, type_analyse):
                 st.markdown(f"### ⚠️ {titre}")
@@ -265,13 +265,13 @@ with tab_dash:
                 with st.expander("🚨 Diagnostic des Vulnérabilités Institutionnelles", expanded=True):
                     if type_analyse == "obstacles":
                         st.markdown(f"""
-                        **Facteur d'achoppement prédominant :** Le principal goulet d'étranglement identifié par l'échantillon est **"{top_obstacle}"** avec un taux d'impact critique de **{top_pct:.1f}%**.
+                        **Facteur d'achoppement prédominant :** Le principal goulet d'étranglement identifié par l'échantillon est **"{top_obstacle}"** avec un taux d'impact critique de **{top_pct:.1f}%**[cite: 26].
                         
-                        **Interprétation pour le stage :** Ce résultat met en évidence une crise structurelle. Lorsque les variables matérielles ou de surpeuplement des classes étouffent l'approche par compétences (APC), l'évaluation sommative se limite à de la récitation théorique, vidant l'Éducation à la Citoyenneté de sa substance pragmatique.
+                        **Interprétation pour le stage :** Ce résultat met en évidence une crise structurelle. Lorsque les variables matérielles ou de surpeuplement des classes étouffent l'approche par compétences (APC), l'évaluation sommative se limite à de la récitation théorique, vidant l'Éducation à la Citoyenneté de sa substance pragmatique[cite: 30, 31].
                         """)
                     else:
                         st.markdown(f"""
-                        **Priorité méthodologique :** La méthode d'évaluation la plus exploitée est **"{top_obstacle}"** ({top_pct:.1f}%).
+                        **Priorité méthodologique :** La méthode d'évaluation la plus exploitée est **"{top_obstacle}"** ({top_pct:.1f}%)[cite: 26].
                         
                         **Interprétation pour le stage :** L'hégémonie de ce mode d'évaluation indique que la notation reste classique. Un équilibre avec les travaux de groupe et les observations en situation réelle est indispensable pour valider de réelles compétences citoyennes.
                         """)
@@ -285,7 +285,7 @@ with tab_dash:
                 "Profil d'Ancienneté des répondants", 
                 "Anciennete", 
                 ["Moins de 5 ans", "6 à 10 ans", "11 à 15 ans", "Plus de 15 ans"],
-                lambda maj, pct: f"La forte proportion d'enseignants ayant une ancienneté de ({maj} : {pct:.1f}%) implique un corps enseignant qui possède des habitudes pédagogiques bien ancrées. S'ils n'ont pas reçu de recyclage récent sur les outils numériques ou cartographiques, le risque d'ankylose méthodologique est élevé."
+                lambda maj, pct: f"La forte proportion d'enseignants ayant une ancienneté de ({maj} : {pct:.1f}%) implique un corps enseignant qui possède des habitudes pédagogiques bien ancrées. S'ils n'ont pas reçu de recyclage récent sur les outils numériques ou cartographiques, le risque d'ankylose méthodologique est élevé[cite: 17, 18]."
             )
             
             # 2. Pratiques réelles
@@ -294,7 +294,7 @@ with tab_dash:
                 "Fréquence d'intégration des exercices pratiques", 
                 "Frequence_Exercices", 
                 ["À chaque leçon", "Souvent", "Parfois", "Rarement", "Jamais"],
-                lambda maj, pct: f"L'évaluation de la fréquence montre que la modalité majoritaire est '{maj}' ({pct:.1f}%). Si cette fréquence est faible ('Rarement'/'Jamais'), cela prouve que les exercices pratiques sont considérés comme des activités secondaires ou optionnelles, souvent sacrifiées pour boucler les programmes théoriques volumineux exigés par les inspections d'Histoire-Géographie."
+                lambda maj, pct: f"L'évaluation de la fréquence montre que la modalité majoritaire est '{maj}' ({pct:.1f}%). Si cette fréquence est faible ('Rarement'/'Jamais'), cela prouve que les exercices pratiques sont considérés comme des activités secondaires ou optionnelles, souvent sacrifiées pour boucler les programmes théoriques volumineux exigés par les inspections d'Histoire-Géographie[cite: 22, 23]."
             )
 
             # 3. Obstacles et Crise structurelle
@@ -318,17 +318,17 @@ with tab_dash:
                 st.markdown("#### 🔍 Lecture et Analyse Critique de la Corrélation :")
                 st.info("""
                 **Interprétation de la fracture sectorielle :**
-                * **Secteur Public :** Généralement marqué par des effectifs massifs, les infrastructures y peinent à suivre, créant une insuffisance chronique de cartes murales et de manuels.
-                * **Secteur Privé / Confessionnel :** Bénéficiant d'un mode de gouvernance plus flexible, ces structures affichent souvent des taux de satisfaction matérielle supérieurs, se traduisant par une mise en œuvre plus fréquente des travaux dirigés et simulations citoyennes.
+                * **Secteur Public :** Généralement marqué par des effectifs massifs, les infrastructures y peinent à suivre, créant une insuffisance chronique de cartes murales et de manuels[cite: 34, 37].
+                * **Secteur Privé / Confessionnel :** Bénéficiant d'un mode de gouvernance plus flexible, ces structures affichent souvent des taux de satisfaction matérielle supérieurs, se traduisant par une mise en œuvre plus fréquente des travaux dirigés et simulations citoyennes[cite: 34, 36].
                 """)
             
             # RECOMMANDATIONS OPÉRATIONNELLES DE STAGE
             st.markdown("### 💡 Propositions de Résolution et Recommandations (Section Stage)")
             st.success("""
             Au terme de cette étude empirique menée dans l'Arrondissement de **Ngaoundéré 1er**, trois axes stratégiques se dégagent pour rehausser le niveau de conduite des exercices pratiques :
-            1. **Réaménagement Horaire :** Sanctuariser une plage horaire hebdomadaire de deux heures exclusivement dédiée aux manipulations pratiques (Cartographie, Travaux de groupes).
-            2. **Mutualisation Institutionnelle :** Créer une banque de ressources numériques (Cartes vectorielles, guides d'exercices d'Histoire) partagée entre les établissements publics et privés de la place.
-            3. **Renforcement des Capacités Locales :** Mettre en place des séminaires d'animation pédagogique au sein des bassins d'apprentissage afin d'initier les jeunes enseignants aux méthodes actives (jeux de rôles citoyennes).
+            1. **Réaménagement Horaire :** Sanctuariser une plage horaire hebdomadaire de deux heures exclusivement dédiée aux manipulations pratiques (Cartographie, Travaux de groupes)[cite: 40].
+            2. **Mutualisation Institutionnelle :** Créer une banque de ressources numériques (Cartes vectorielles, guides d'exercices d'Histoire) partagée entre les établissements publics et privés de la place[cite: 41].
+            3. **Renforcement des Capacités Locales :** Mettre en place des séminaires d'animation pédagogique au sein des bassins d'apprentissage afin d'initier les jeunes enseignants aux méthodes actives (jeux de rôles citoyennes)[cite: 42].
             """)
             
         else:
