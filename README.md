@@ -11,3 +11,4 @@ Ce dépôt contient l'application de centralisation, d'analyse statistique et de
 
 | Horodatage | Établissement | Statut | Sexe | Ancienneté | Fréquence | Solutions Proposées |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-06-19 03:23:28 | bawa | Public | Masculin | 11 à 15 ans | Parfois | reduire les effectfs |
